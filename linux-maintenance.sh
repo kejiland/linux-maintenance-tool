@@ -9,11 +9,11 @@ else
   C_RESET=''; C_CYAN=''; C_GREEN=''; C_YELLOW=''; C_RED=''; C_PURPLE=''; C_BLUE=''; C_GRAY=''
 fi
 
-pause() { read -r -p $'\n按 Enter 返回菜单…' _ || true; }
+pause() { read -r -p $'\\n按 Enter 返回菜单…' _ < /dev/tty || true; }
 header() { clear 2>/dev/null || true; printf '%b\n' "${C_CYAN}Linux 维护工具${C_RESET}"; printf '%s\n' '----------------------------------------'; }
 need_root() { [[ ${EUID:-$(id -u)} -eq 0 ]] || { printf '%b\n' "${C_RED}请使用 root 运行此功能。${C_RESET}"; return 1; }; }
 run() { printf '%b\n' "${C_BLUE}▶ $*${C_RESET}"; "$@"; }
-confirm() { local a; read -r -p "$1 [y/N] " a; [[ "$a" =~ ^[Yy]$ ]]; }
+confirm() { local a; read -r -p "$1 [y/N] " a < /dev/tty; [[ "$a" =~ ^[Yy]$ ]]; }
 
 pkg_manager() {
   if command -v apt-get >/dev/null 2>&1; then echo apt
@@ -92,7 +92,7 @@ component_menu() {
 4. 卸载常用工具
 0. 返回主菜单
 EOF
-    if ! read -r -p '请输入选择: ' c; then echo; echo '输入终端已关闭，脚本退出。'; exit 0; fi
+    if ! read -r -p '请输入选择: ' c < /dev/tty; then echo; echo '输入终端已关闭，脚本退出。'; exit 0; fi
     case "$c" in
       1) need_root && install_pkgs curl wget sudo unzip tar jq git; pause;;
       2) need_root && install_pkgs htop btop iftop iotop; pause;;
@@ -115,7 +115,7 @@ docker_menu() {
 7. 卸载 Docker
 0. 返回主菜单
 EOF
-    if ! read -r -p '请输入选择: ' c; then echo; echo '输入终端已关闭，脚本退出。'; exit 0; fi
+    if ! read -r -p '请输入选择: ' c < /dev/tty; then echo; echo '输入终端已关闭，脚本退出。'; exit 0; fi
     case "$c" in
       1) need_root && { command -v docker >/dev/null 2>&1 && docker version || install_pkgs ca-certificates curl; command -v docker >/dev/null 2>&1 || curl -fsSL https://get.docker.com | sh; }; pause;;
       2) systemctl status docker --no-pager 2>/dev/null || docker info 2>/dev/null || true; pause;;
@@ -142,7 +142,7 @@ runtime_menu() {
 8. 卸载 Java
 0. 返回主菜单
 EOF
-    if ! read -r -p '请输入选择: ' c; then echo; echo '输入终端已关闭，脚本退出。'; exit 0; fi
+    if ! read -r -p '请输入选择: ' c < /dev/tty; then echo; echo '输入终端已关闭，脚本退出。'; exit 0; fi
     case "$c" in
       1) need_root && install_pkgs python3 python3-pip; pause;;
       2) need_root && install_pkgs nodejs npm; pause;;
@@ -170,7 +170,7 @@ system_tools() {
 8. 重启服务器
 0. 返回主菜单
 EOF
-    if ! read -r -p '请输入选择: ' c; then echo; echo '输入终端已关闭，脚本退出。'; exit 0; fi
+    if ! read -r -p '请输入选择: ' c < /dev/tty; then echo; echo '输入终端已关闭，脚本退出。'; exit 0; fi
     case "$c" in
       1) printf '在 ~/.bashrc 中加入 alias maint="%s"\n' "$(realpath "$0")"; pause;;
       2) need_root && { read -r -p '新 SSH 端口: ' port; [[ "$port" =~ ^[0-9]+$ ]] && sed -i -E "s/^#?Port .*/Port $port/" /etc/ssh/sshd_config && systemctl restart ssh 2>/dev/null || systemctl restart sshd 2>/dev/null; }; pause;;
@@ -198,7 +198,7 @@ main() {
 8. 退出脚本
 
 EOF
-    if ! read -r -p '请输入选择: ' c; then echo; echo '输入终端已关闭，脚本退出。'; exit 0; fi
+    if ! read -r -p '请输入选择: ' c < /dev/tty; then echo; echo '输入终端已关闭，脚本退出。'; exit 0; fi
     case "$c" in
       1) show_info;; 2) system_update;; 3) cleanup;; 4) component_menu;; 5) docker_menu;; 6) runtime_menu;; 7) system_tools;; 8|q|Q) echo '已退出。'; exit 0;; *) echo '无效选择'; sleep 1;;
     esac
